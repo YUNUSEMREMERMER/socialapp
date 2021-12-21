@@ -44,7 +44,6 @@ class _HesapOlusturState extends State<HesapOlustur> {
                   children: [
                     TextFormField(
                       autocorrect: true,
-                      keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         hintText: "Kullanıcı adınızı giriniz",
                         labelText: "Kullanıcı adı",
@@ -142,7 +141,8 @@ class _HesapOlusturState extends State<HesapOlustur> {
       try {
         Kullanici kullanici = await _yetkilendirmeServisi.mailIleKayit(email, sifre);
         if(kullanici != null){
-          FireStoreServisi().kullaniciOlustur(id: kullanici.id,email: kullanici.email,kullaniciAdi: kullanici.kullaniciAdi);
+          
+          FireStoreServisi().kullaniciOlustur(id: kullanici.id,email: email,kullaniciAdi: kullaniciAdi);
         }
         Navigator.pop(context);
       } catch (hata) {

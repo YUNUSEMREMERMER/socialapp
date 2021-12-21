@@ -23,6 +23,7 @@ class Yonlendirme extends StatelessWidget {
         }
         if(snapshot.hasData){
           Kullanici aktifKullanici = snapshot.data;
+          _yetkilendirmeServisi.aktifKullaniciId = aktifKullanici.id;
           return Anasayfa();
         }else{
           return GirisSayfasi();

@@ -26,4 +26,14 @@ class FireStoreServisi{
       }
       return null;
     }
+
+    Future<int> takipciSayisi(kullaniciId)async{
+      QuerySnapshot snapshot = await _firestore.collection("takipciler").document(kullaniciId).collection("kullaniciTakipcileri").getDocuments();
+      return snapshot.documents.length;
+    }
+
+    Future<int> takipEdilenSayisi(kullaniciId)async{
+      QuerySnapshot snapshot = await _firestore.collection("takipedilenler").document(kullaniciId).collection("kullaniciTakipleri").getDocuments();
+      return snapshot.documents.length;
+    }
 }
