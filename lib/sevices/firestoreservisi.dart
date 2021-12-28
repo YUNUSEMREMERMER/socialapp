@@ -1,5 +1,6 @@
 // @dart=2.9
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:socialapp/models/gonderi.dart';
 import 'package:socialapp/models/kullanici.dart';
 
 class FireStoreServisi{
@@ -35,5 +36,24 @@ class FireStoreServisi{
     Future<int> takipEdilenSayisi(kullaniciId)async{
       QuerySnapshot snapshot = await _firestore.collection("takipedilenler").document(kullaniciId).collection("kullaniciTakipleri").getDocuments();
       return snapshot.documents.length;
+    }
+
+    Future<void> gonderiOlustur({gonderiResimUrl,aciklama,yayinlayanId,konum})async{
+      await _firestore.collection("gonderiler").document(yayinlayanId).collection("kullaniciGonderileri").add({
+        "gonderiResmiUrl": gonderiResimUrl,
+        "aciklama": aciklama,
+        "yayinlayanId":yayinlayanId,
+        "begeniSayisi":0,
+        "konum":konum,
+        "olusturulmaZamani":zaman
+
+      });
+
+    }
+
+    Future<List<Gonderi>> gonderileriGetir(kullaniciId)async{
+      QuerySnapshot snapshot =  await _firestore.collection("gonderiler").document(kullaniciId).collection("kullaniciGonderileri").orderBy("olusturulmaZamani",descending: true).getDocuments();
+      List<Gonderi> gonderiler =  snapshot.documents.map((doc) => Gonderi.dokumandanUret(doc)).toList();
+      return gonderiler;
     }
 }

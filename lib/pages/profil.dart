@@ -1,9 +1,11 @@
 // @dart=2.9
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:socialapp/models/gonderi.dart';
 import 'package:socialapp/models/kullanici.dart';
 import 'package:socialapp/sevices/firestoreservisi.dart';
 import 'package:socialapp/sevices/yetkilendirmeservisi.dart';
+import 'package:socialapp/widgetlar/gonderikarti.dart';
 
 class Profil extends StatefulWidget {
   final String profilsahibiId;
@@ -18,18 +20,31 @@ class _ProfilState extends State<Profil> {
   int _gonderiSayisi = 0;
   int _takipci = 0;
   int _takipEdilen = 0;
+  List<Gonderi> _gonderiler = [];
+  String gonderiStili = "liste";
 
-  _takipciSayisiGetir() async{
-    int takipciSayisi = await FireStoreServisi().takipciSayisi(widget.profilsahibiId);
+  _takipciSayisiGetir() async {
+    int takipciSayisi =
+        await FireStoreServisi().takipciSayisi(widget.profilsahibiId);
     setState(() {
       _takipci = takipciSayisi;
     });
   }
 
-  _takipEdilenSayisiGetir() async{
-    int takipEdilenSayisi = await FireStoreServisi().takipEdilenSayisi(widget.profilsahibiId);
+  _takipEdilenSayisiGetir() async {
+    int takipEdilenSayisi =
+        await FireStoreServisi().takipEdilenSayisi(widget.profilsahibiId);
     setState(() {
       _takipEdilen = takipEdilenSayisi;
+    });
+  }
+
+  _gonderileriGetir() async {
+    List<Gonderi> gonderiler =
+        await FireStoreServisi().gonderileriGetir(widget.profilsahibiId);
+    setState(() {
+      _gonderiler = gonderiler;
+      _gonderiSayisi = _gonderiler.length;
     });
   }
 
@@ -39,6 +54,7 @@ class _ProfilState extends State<Profil> {
     super.initState();
     _takipciSayisiGetir();
     _takipEdilenSayisiGetir();
+    _gonderileriGetir();
   }
 
   @override
@@ -68,11 +84,46 @@ class _ProfilState extends State<Profil> {
             }
 
             return ListView(
-              children: [
-                _profilDetaylari(snapshot.data),
-              ],
+              children: [_profilDetaylari(snapshot.data), _gonderileriGoster()],
             );
           }),
+    );
+  }
+
+  Widget _gonderileriGoster() {
+    if (gonderiStili == "liste") {
+      return ListView.builder(
+        shrinkWrap: true,
+        primary: false,
+        itemCount: _gonderiler.length,
+        itemBuilder: (context, index) {
+          return Gonderikarti();
+        },
+      );
+    } else {
+      List<GridTile> fayanslar = [];
+      _gonderiler.forEach((gonderi) {
+        fayanslar.add(_fayansOlustur(gonderi));
+      });
+
+      return GridView.count(
+        crossAxisCount: 3,
+        shrinkWrap: true,
+        mainAxisSpacing: 2.0,
+        crossAxisSpacing: 2.0,
+        childAspectRatio: 1.0,
+        physics: NeverScrollableScrollPhysics(),
+        children: fayanslar,
+      );
+    }
+  }
+
+  GridTile _fayansOlustur(Gonderi gonderi) {
+    return GridTile(
+      child: Image.network(
+        gonderi.gonderiResmiUrl,
+        fit: BoxFit.cover,
+      ),
     );
   }
 
@@ -87,7 +138,9 @@ class _ProfilState extends State<Profil> {
               CircleAvatar(
                 backgroundColor: Colors.grey[300],
                 radius: 50.0,
-                backgroundImage: profilData.fotoUrl.isNotEmpty ? NetworkImage(profilData.fotoUrl) : AssetImage("assets/images/balik.jpg"),
+                backgroundImage: profilData.fotoUrl.isNotEmpty
+                    ? NetworkImage(profilData.fotoUrl)
+                    : AssetImage("assets/images/balik.jpg"),
               ),
               Expanded(
                 child: Row(
